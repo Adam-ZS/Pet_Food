@@ -11,52 +11,147 @@
     --text: #eaf0ff;
     --accent: #5cc0ff;
     --green: #27e59f;
+    --shadow-color: rgba(92, 192, 255, 0.35); /* --- New Addition --- */
   }
   * { box-sizing: border-box; }
+
+  /* --- New Addition: Animated Background --- */
+  @keyframes animated-gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
   body {
     margin: 0; padding: 28px; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    background: radial-gradient(1200px 800px at 20% -10%, rgba(92,192,255,.07), transparent 40%),
-                radial-gradient(1000px 700px at 100% 0%, rgba(139,255,202,.06), transparent 40%),
-                var(--bg);
     color: var(--text);
+    /* --- Modified Rule: Added animation and size --- */
+    background:
+      radial-gradient(1200px 800px at 20% -10%, rgba(92,192,255,.07), transparent 40%),
+      radial-gradient(1000px 700px at 100% 0%, rgba(139,255,202,.06), transparent 40%),
+      var(--bg);
+    background-size: 200% 200%;
+    animation: animated-gradient 25s ease infinite;
   }
-  h1 { margin: 0 0 6px; font-size: 30px; letter-spacing: 0.2px; }
+
+  /* --- New Addition: Glowing Text Gradient --- */
+  h1 {
+    margin: 0 0 6px; font-size: 32px; letter-spacing: 0.5px;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 15px rgba(92, 192, 255, 0.2);
+  }
+
   .sub { color: var(--muted); margin-bottom: 18px; }
-  .toolbar { display:flex; gap:12px; align-items:center; margin:10px 0 14px; flex-wrap:wrap; }
+  .toolbar { display:flex; gap:12px; align-items-center; margin:10px 0 14px; flex-wrap:wrap; }
   .search { flex:1 1 320px; }
+
+  /* --- Modified Rule: Focus state and transition --- */
   .search input {
     width:100%; padding:14px 16px; border-radius:14px; border:1px solid #2b355a; outline:none;
     background:#0f1731; color:#fff; font-size:15px;
+    transition: all 0.3s ease;
   }
-  .btn { padding:10px 14px; border-radius:12px; border:1px solid #315a86; background:#123257; color:#d7e6ff; cursor:pointer; }
-  .btn.primary { border-color:#1a6a53; background:#0f3a2e; }
+  .search input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px var(--shadow-color);
+  }
+
+  /* --- Modified Rule: Hover effect and transition --- */
+  .btn {
+    padding:10px 14px; border-radius:12px; border:1px solid #315a86; background:#123257;
+    color:#d7e6ff; cursor:pointer;
+    transition: all 0.3s ease;
+  }
+  .btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.2);
+  }
+
+  /* --- New Addition: Pulsing glow animation --- */
+  @keyframes pulse-glow {
+    0% { box-shadow: 0 0 8px rgba(39, 229, 159, 0.4); }
+    50% { box-shadow: 0 0 16px rgba(39, 229, 159, 0.8); }
+    100% { box-shadow: 0 0 8px rgba(39, 229, 159, 0.4); }
+  }
+
+  .btn.primary {
+    border-color:#1a6a53; background:#0f3a2e;
+    animation: pulse-glow 3s infinite;
+  }
   .btn.danger { border-color:#6a3131; background:#3a0f0f; }
   .btn.small { padding:6px 10px; border-radius:10px; }
+
+  /* --- Modified Rule: Gradient border effect --- */
   .table-wrap {
-    width:100%; overflow:auto; border:1px solid #28325a; border-radius:16px; background: #0f1731;
-    box-shadow: 0 22px 46px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.03);
+    width:100%; overflow:auto;
+    border-radius:16px;
+    padding: 1px; /* The trick for the gradient border */
+    background: linear-gradient(135deg, #28325a, #1a6a53);
+    box-shadow: 0 22px 46px rgba(0,0,0,.35);
   }
-  table { width:100%; border-collapse:separate; border-spacing:0; min-width:1200px; }
+  .table-wrap-inner { /* --- New Addition --- */
+     background: #0f1731;
+     border-radius: 15px; /* Slightly smaller than parent */
+     overflow: hidden; /* To clip the table corners */
+  }
+  table {
+    width:100%; border-collapse:separate; border-spacing:0; min-width:1200px;
+  }
+
+  /* --- Modified Rule: Frosted glass effect --- */
   thead th {
-    position: sticky; top:0; z-index:5; text-align:left; background:linear-gradient(180deg,#172046, #121933);
+    position: sticky; top:0; z-index:5; text-align:left;
+    background: rgba(18, 25, 51, 0.75);
+    backdrop-filter: blur(8px);
     color:#b9c7e9; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:.06em;
     padding:14px; border-bottom:1px solid #28325a;
   }
+
   tbody td { padding:14px; border-bottom:1px dashed #263056; vertical-align:middle; }
-  tbody tr:hover { background:rgba(92,192,255,.06); }
+  /* --- Modified Rule: Enhanced hover effect --- */
+  tbody tr {
+    transition: all 0.3s ease;
+  }
+  tbody tr:hover {
+    background:rgba(92,192,255,.08);
+    transform: scale(1.01); /* Lifts the row slightly */
+    box-shadow: 0 10px 20px rgba(0,0,0,.3);
+    position: relative;
+    z-index: 2;
+  }
+
   .img-cell { width: 380px; }
+  /* --- Modified Rule: Glowing hover for images --- */
   .thumb {
     width: 340px; height: auto; max-height: 340px; object-fit: cover;
     border-radius: 16px; display:block; background:#101936; border:1px solid #28325a;
     box-shadow: 0 10px 22px rgba(0,0,0,.28);
+    transition: all 0.3s ease;
   }
+  tr:hover .thumb {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px var(--shadow-color);
+  }
+
   .img-actions { margin-top:8px; display:flex; gap:8px; }
   .pill { display:inline-block; padding:6px 10px; border-radius:999px; background:rgba(92,192,255,.12); color:#cfe9ff; font-size:12px; }
-  .footer { margin-top:12px; color:#95a6cc; font-size:12px; }
+  .footer { margin-top:12px; color:#95a6cc; font-size:12px; text-align:center; } /* Centered */
   .editable { white-space:nowrap; }
+
+  /* --- Modified Rule: Focus state --- */
   input.inline-input {
     width: 260px; padding:6px 8px; border-radius:8px; border:1px solid #2b355a; background:#0e1732; color:#fff;
+    transition: border-color 0.3s ease;
   }
+  input.inline-input:focus {
+    border-color: var(--accent);
+    outline: none;
+  }
+
   td.weight .inline-input { width: 150px; }
   td.price .inline-input { width: 200px; }
 
@@ -64,6 +159,12 @@
   .add-wrap { display:none; gap:10px; flex-wrap:wrap; align-items:center; margin:10px 0 16px; }
   .add-wrap input {
     padding:10px 12px; border-radius:10px; border:1px solid #2b355a; background:#0e1732; color:#fff;
+    transition: all 0.3s ease;
+  }
+  .add-wrap input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px var(--shadow-color);
+    outline: none;
   }
   .add-wrap .wide { min-width:260px; }
   .add-wrap .mid  { min-width:160px; }
@@ -73,7 +174,7 @@
   tr.zoom-row td {
     background: #0d1430;
     padding: 18px;
-    border-bottom: 1px dashed #263056;
+    border-bottom: 1px solid #28325a; /* Solid instead of dashed */
   }
   .zoom-wrap {
     width: 100%;
@@ -112,6 +213,7 @@
   </div>
 
   <div class="table-wrap">
+  <div class="table-wrap-inner">
     <table id="tbl">
       <thead>
         <tr>
@@ -125,6 +227,7 @@
       </thead>
       <tbody id="tbody"></tbody>
     </table>
+  </div>
   </div>
 
   <div class="footer">Tip: Use “Zoom” to open the image below the row (full size within your screen). Use the Add form to append more products.</div>
