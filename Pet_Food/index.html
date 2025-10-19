@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Pet Food Price Comparison</title>
+<style>
+  :root {
+    --bg: #0b3741;
+    --muted: #8aa0c5;
+    --text: #eaf0ff;
+    --accent: #5cc0ff;
+    --green: #27e59f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    background: radial-gradient(1200px 800px at 20% -10%, rgba(92,192,255,.07), transparent 40%),
+                radial-gradient(1000px 700px at 100% 0%, rgba(139,255,202,.06), transparent 40%),
+                var(--bg);
+    color: var(--text);
+  }
+  h1 { margin: 0 0 6px; font-size: 30px; letter-spacing: 0.2px; }
+  .sub { color: var(--muted); margin-bottom: 18px; }
+  .toolbar { display:flex; gap:12px; align-items:center; margin:10px 0 14px; flex-wrap:wrap; }
+  .search { flex:1 1 320px; }
+  .search input {
+    width:100%; padding:14px 16px; border-radius:14px; border:1px solid #2b355a; outline:none;
+    background:#0f1731; color:var(--text); font-size:15px;
+  }
+  .table-wrap {
+    width:100%; overflow:auto; border:1px solid #28325a; border-radius:16px; background: #0f1731;
+    box-shadow: 0 22px 46px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.03);
+  }
+  table { width:100%; border-collapse:separate; border-spacing:0; min-width:1080px; }
+  thead th {
+    position: sticky; top:0; z-index:5; text-align:left; background:linear-gradient(180deg,#172046, #121933);
+    color:#b9c7e9; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:.06em;
+    padding:14px; border-bottom:1px solid #28325a;
+  }
+  tbody td { padding:14px; border-bottom:1px dashed #263056; vertical-align:middle; }
+  tbody tr:hover { background:rgba(92,192,255,.06); }
+  .img-cell { width: 380px; }
+  .thumb {
+    width: 340px; height: auto; max-height: 340px; object-fit: cover;
+    border-radius: 16px; display:block; background:#101936; border:1px solid #28325a;
+    box-shadow: 0 10px 22px rgba(0,0,0,.28);
+  }
+  .img-actions { margin-top:8px; }
+  .zoom, .edit, .save, .cancel {
+    margin-right:8px; padding:6px 10px; border-radius:10px; border:1px solid #315a86; background:#123257; color:#d7e6ff; cursor:pointer;
+  }
+  .save { border-color:#1a6a53; background:#0f3a2e; }
+  .cancel { border-color:#6a3131; background:#3a0f0f; }
+  .thumb.broken { width: 200px; height: 150px; background:#1b2446; display:grid; place-items:center; color:#8aa0c5; }
+  .pill { display:inline-block; padding:6px 10px; border-radius:999px; background:rgba(92,192,255,.12); color:#cfe9ff; font-size:12px; }
+  .footer { margin-top:12px; color:#95a6cc; font-size:12px; }
+  .price-cell { white-space:nowrap; }
+  input.price-input {
+    width: 200px; padding:6px 8px; border-radius:8px; border:1px solid #2b355a; background:#0e1732; color:#fff;
+  }
+
+  /* In-place zoom row */
+  tr.zoom-row td {
+    background: #0d1430;
+    padding: 18px;
+    border-bottom: 1px dashed #263056;
+  }
+  .zoom-wrap {
+    width: 100%;
+    display: grid;
+    place-items: center;
+  }
+  .zoom-img {
+    max-width: 100%;
+    max-height: 78vh;
+    object-fit: contain; /* not cropped */
+    border-radius: 14px;
+    border: 1px solid #2b355a;
+    box-shadow: 0 16px 30px rgba(0,0,0,.35);
+  }
+</style>
+</head>
+<body>
+  <h1>Pet Food Price Comparison</h1>
+  <div class="sub">Place <strong>index.html</strong> inside <code>Pet_Food/</code> and all images inside <code>Pet_Food/images/</code>. Prices are editable (saved to your browser). Use <em>Zoom</em> to expand an image in place.</div>
+
+  <div class="toolbar">
+    <div class="search"><input id="q" type="search" placeholder="Search by brand, product, type or price… (e.g., Whiskas, 1.5 kg, pouch, 9.50)" oninput="filterRows()"/></div>
+    <span class="pill">Total items: 28</span>
+  </div>
+
+  <div class="table-wrap">
+    <table id="tbl">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Brand</th>
+          <th>Product</th>
+          <th>Type</th>
+          <th>Weight</th>
+          <th>Price (AED)</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+    <tr data-key="price_0">
+      <td class="img-cell">
+        <img src="images/whicska%20cat%20wet%20can.jpeg" alt="whicska cat wet can.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/whicska%20cat%20wet%20can.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Whiskas</td>
+      <td>Tasty Mince Beef / Lamb & Turkey (Can)</td>
+      <td>Wet Cat Food</td>
+      <td>400 g</td>
+      <td class="price-cell">
+        <span class="price" data-default="9.50 – 9.75">9.50 – 9.75</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_1">
+      <td class="img-cell">
+        <img src="images/whiskas%20wet%20cat.jpeg" alt="whiskas wet cat.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/whiskas%20wet%20cat.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Whiskas</td>
+      <td>Ocean Fish / Tuna / Salmon (Pouch)</td>
+      <td>Wet Cat Food</td>
+      <td>85 g</td>
+      <td class="price-cell">
+        <span class="price" data-default="3.50 – 5.00">3.50 – 5.00</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_2">
+      <td class="img-cell">
+        <img src="images/whiskas%20wet%20cat.jpeg" alt="whiskas wet cat.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/whiskas%20wet%20cat.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Whiskas</td>
+      <td>Mix of Tuna Collection 12×70 g</td>
+      <td>Multipack Pouches</td>
+      <td>840 g</td>
+      <td class="price-cell">
+        <span class="price" data-default="35.98">35.98</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_3">
+      <td class="img-cell">
+        <img src="images/purina%20fncy%20tuna%20treat%20cat.jpeg" alt="purina fncy tuna treat cat.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/purina%20fncy%20tuna%20treat%20cat.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Fancy Feast</td>
+      <td>Tuna / Grilled / Gravy Lovers (Can)</td>
+      <td>Wet Cat Food</td>
+      <td>85 g</td>
+      <td class="price-cell">
+        <span class="price" data-default="4.99 – 6.95">4.99 – 6.95</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_4">
+      <td class="img-cell">
+        <img src="images/purina%20felix.jpeg" alt="purina felix.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/purina%20felix.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Purina Felix</td>
+      <td>As Good As It Looks (Jelly Range)</td>
+      <td>Wet Cat Pouch</td>
+      <td>85 g</td>
+      <td class="price-cell">
+        <span class="price" data-default="3.75 – 4.75">3.75 – 4.75</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_5">
+      <td class="img-cell">
+        <img src="images/purina%20felix.jpeg" alt="purina felix.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/purina%20felix.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Purina ONE</td>
+      <td>Healthy Kitten & Adult (Pouch)</td>
+      <td>Wet Cat Pouch</td>
+      <td>85 g</td>
+      <td class="price-cell">
+        <span class="price" data-default="6.99">6.99</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_6">
+      <td class="img-cell">
+        <img src="images/purina%20adul%20dry.jpeg" alt="purina adul dry.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/purina%20adul%20dry.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Purina Pro Plan</td>
+      <td>Adult Vital Functions (Salmon)</td>
+      <td>Dry Cat Food</td>
+      <td>—</td>
+      <td class="price-cell">
+        <span class="price" data-default="—">—</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_7">
+      <td class="img-cell">
+        <img src="images/purena%20wet.jpeg" alt="purena wet.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/purena%20wet.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Purina Pro Plan Vet Diets</td>
+      <td>EN Gastrointestinal with Chicken</td>
+      <td>Wet Cat Food</td>
+      <td>850 g</td>
+      <td class="price-cell">
+        <span class="price" data-default="—">—</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_8">
+      <td class="img-cell">
+        <img src="images/reflex%20cat%20dry%20.jpeg" alt="reflex cat dry .jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/reflex%20cat%20dry%20.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Reflex</td>
+      <td>Kitten Chicken & Rice</td>
+      <td>Dry Cat Food</td>
+      <td>2 kg</td>
+      <td class="price-cell">
+        <span class="price" data-default="47.25">47.25</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_9">
+      <td class="img-cell">
+        <img src="images/cindee%20cat%20food.jpeg" alt="cindee cat food.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/cindee%20cat%20food.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Cindee</td>
+      <td>Cat Food Mackerel</td>
+      <td>Dry Cat Food</td>
+      <td>1.5 kg</td>
+      <td class="price-cell">
+        <span class="price" data-default="24.00">24.00</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_10">
+      <td class="img-cell">
+        <img src="images/me-o%20cat%20adult.jpeg" alt="me-o cat adult.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/me-o%20cat%20adult.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Me-O</td>
+      <td>Seafood Adult</td>
+      <td>Dry Cat Food</td>
+      <td>1.2 kg</td>
+      <td class="price-cell">
+        <span class="price" data-default="26.99">26.99</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_11">
+      <td class="img-cell">
+        <img src="images/cutie%20catz%20treats.jpeg" alt="cutie catz treats.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/cutie%20catz%20treats.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Cuties Catz</td>
+      <td>Creamy Cat Treats (Tuna/Salmon)</td>
+      <td>Treat</td>
+      <td>56 g</td>
+      <td class="price-cell">
+        <span class="price" data-default="7.99">7.99</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_12">
+      <td class="img-cell">
+        <img src="images/cuties%20Catz%20dry.jpeg" alt="cuties Catz dry.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/cuties%20Catz%20dry.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Cuties Catz</td>
+      <td>Seafood Flavor</td>
+      <td>Dry Cat Food</td>
+      <td>1 kg</td>
+      <td class="price-cell">
+        <span class="price" data-default="17.99">17.99</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_13">
+      <td class="img-cell">
+        <img src="images/petrina%20catfood%20can.jpeg" alt="petrina catfood can.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/petrina%20catfood%20can.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Petrina</td>
+      <td>Cat Pâté w/ MSC White Fish</td>
+      <td>Wet Pâté</td>
+      <td>100 g</td>
+      <td class="price-cell">
+        <span class="price" data-default="2.49">2.49</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_14">
+      <td class="img-cell">
+        <img src="images/petrina%20cat%20wet%20food%20.jpeg" alt="petrina cat wet food .jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/petrina%20cat%20wet%20food%20.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Petrina</td>
+      <td>Beef Chunks in Gravy (Can)</td>
+      <td>Wet Cat Food</td>
+      <td>410 g</td>
+      <td class="price-cell">
+        <span class="price" data-default="3.50 (2 for 7 AED)">3.50 (2 for 7 AED)</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_15">
+      <td class="img-cell">
+        <img src="images/petrina%20cat%20pillow%20traet.jpeg" alt="petrina cat pillow traet.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/petrina%20cat%20pillow%20traet.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Petrina</td>
+      <td>Cat Pillow Chicken</td>
+      <td>Treat Bites</td>
+      <td>60 g</td>
+      <td class="price-cell">
+        <span class="price" data-default="3.99">3.99</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_16">
+      <td class="img-cell">
+        <img src="images/petrina%20treat%20premuim.jpeg" alt="petrina treat premuim.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/petrina%20treat%20premuim.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Petrina</td>
+      <td>Cat Sticks (Beef & Poultry / Poultry & Lamb)</td>
+      <td>Treat Sticks</td>
+      <td>50 g</td>
+      <td class="price-cell">
+        <span class="price" data-default="6.99">6.99</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_17">
+      <td class="img-cell">
+        <img src="images/petrina%20tuna%20catwet.jpeg" alt="petrina tuna catwet.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/petrina%20tuna%20catwet.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Petrina</td>
+      <td>Adult Cat Tuna / Kitten Tuna (Pouch)</td>
+      <td>Wet Cat Pouch</td>
+      <td>75 g</td>
+      <td class="price-cell">
+        <span class="price" data-default="1.49">1.49</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_18">
+      <td class="img-cell">
+        <img src="images/petrina%20wet.jpeg" alt="petrina wet.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/petrina%20wet.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Petrina</td>
+      <td>Adult Cat Chicken & Tuna / Chicken & Salmon (Pouch)</td>
+      <td>Wet Cat Pouch</td>
+      <td>75 g</td>
+      <td class="price-cell">
+        <span class="price" data-default="1.49">1.49</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_19">
+      <td class="img-cell">
+        <img src="images/BADO%28cat%29.jpeg" alt="BADO(cat).jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/BADO%28cat%29.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Bado</td>
+      <td>Adult Cat Food Salmon</td>
+      <td>Dry Cat Food</td>
+      <td>1.5 kg</td>
+      <td class="price-cell">
+        <span class="price" data-default="19.95">19.95</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_20">
+      <td class="img-cell">
+        <img src="images/pedigre%20dog%20adult%20mini%20dry.jpeg" alt="pedigre dog adult mini dry.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/pedigre%20dog%20adult%20mini%20dry.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Pedigree</td>
+      <td>Adult Mini Toy & Small Breed</td>
+      <td>Dry Dog Food</td>
+      <td>1.5 kg</td>
+      <td class="price-cell">
+        <span class="price" data-default="27.99">27.99</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_21">
+      <td class="img-cell">
+        <img src="images/purina%20dog%20small%20bites%20premuim.jpeg" alt="purina dog small bites premuim.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/purina%20dog%20small%20bites%20premuim.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Purina ONE</td>
+      <td>Small Bites Beef & Rice</td>
+      <td>Dry Dog Food</td>
+      <td>1.8 kg</td>
+      <td class="price-cell">
+        <span class="price" data-default="50.75">50.75</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_22">
+      <td class="img-cell">
+        <img src="images/royalkanin%20mini%20wet.jpeg" alt="royalkanin mini wet.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/royalkanin%20mini%20wet.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Royal Canin</td>
+      <td>Mini Adult Gravy Salsa (12×85 g)</td>
+      <td>Wet Dog Food Pouch</td>
+      <td>1.02 kg</td>
+      <td class="price-cell">
+        <span class="price" data-default="—">—</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_23">
+      <td class="img-cell">
+        <img src="images/royalkanin%20puppy%20wet.jpeg" alt="royalkanin puppy wet.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/royalkanin%20puppy%20wet.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Royal Canin</td>
+      <td>Mini Puppy 2–10 Months (12×85 g)</td>
+      <td>Wet Dog Food Pouch</td>
+      <td>1.02 kg</td>
+      <td class="price-cell">
+        <span class="price" data-default="—">—</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_24">
+      <td class="img-cell">
+        <img src="images/royalkanin%20puppy.jpeg" alt="royalkanin puppy.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/royalkanin%20puppy.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Royal Canin</td>
+      <td>Mini Indoor Puppy 2–10 Months</td>
+      <td>Dry Dog Food</td>
+      <td>—</td>
+      <td class="price-cell">
+        <span class="price" data-default="—">—</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_25">
+      <td class="img-cell">
+        <img src="images/royalkanin%20mini%20dog.jpeg" alt="royalkanin mini dog.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/royalkanin%20mini%20dog.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Royal Canin</td>
+      <td>Mini Adult Dry</td>
+      <td>Dry Dog Food</td>
+      <td>—</td>
+      <td class="price-cell">
+        <span class="price" data-default="—">—</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_26">
+      <td class="img-cell">
+        <img src="images/BADO%28turky%29dog.jpeg" alt="BADO(turky)dog.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/BADO%28turky%29dog.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Bado</td>
+      <td>Adult Dog Food Lamb & Rice</td>
+      <td>Dry Dog Food</td>
+      <td>2.5 kg</td>
+      <td class="price-cell">
+        <span class="price" data-default="18.99">18.99</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+    <tr data-key="price_27">
+      <td class="img-cell">
+        <img src="images/CargeDOG.jpeg" alt="CargeDOG.jpeg" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+        <div class="img-actions">
+          <button class="zoom" onclick="toggleZoom(this, 'images/CargeDOG.jpeg')">Zoom</button>
+        </div>
+      </td>
+      <td>Carge</td>
+      <td>Adult Dog Food Beef</td>
+      <td>Dry Dog Food</td>
+      <td>—</td>
+      <td class="price-cell">
+        <span class="price" data-default="13.95">13.95</span>
+        <button class="edit" onclick="editPrice(this)">Edit</button>
+      </td>
+    </tr>
+    
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">Tip: Click “Zoom” to expand the image right below the row (full size within your screen). Click “Zoom” again to close.</div>
+
+<script>
+// Load saved prices
+document.querySelectorAll('tbody tr').forEach((row)=>{
+  const key = row.getAttribute('data-key');
+  const saved = localStorage.getItem(key);
+  if(saved) {
+    row.querySelector('.price').textContent = saved;
+  }
+});
+
+function editPrice(btn) {
+  const cell = btn.closest('.price-cell');
+  const row = btn.closest('tr');
+  const key = row.getAttribute('data-key');
+  const priceSpan = cell.querySelector('.price');
+  const current = priceSpan.textContent.trim();
+  cell.innerHTML = `
+    <input class="price-input" value="${current}" />
+    <button class="save" onclick="savePrice(this)">Save</button>
+    <button class="cancel" onclick="cancelEdit(this)">Cancel</button>
+  `;
+  cell.querySelector('.price-input').focus();
+}
+
+function savePrice(btn) {
+  const cell = btn.closest('.price-cell');
+  const row = btn.closest('tr');
+  const key = row.getAttribute('data-key');
+  const val = cell.querySelector('.price-input').value.trim();
+  localStorage.setItem(key, val);
+  cell.innerHTML = `<span class="price" data-default="${val}">${val}</span> <button class="edit" onclick="editPrice(this)">Edit</button>`;
+}
+
+function cancelEdit(btn) {
+  const cell = btn.closest('.price-cell');
+  const row = btn.closest('tr');
+  const key = row.getAttribute('data-key');
+  const saved = localStorage.getItem(key);
+  const original = cell.querySelector('.price-input').getAttribute('value');
+  const val = saved || original;
+  cell.innerHTML = `<span class="price" data-default="${val}">${val}</span> <button class="edit" onclick="editPrice(this)">Edit</button>`;
+}
+
+function filterRows(){
+  const q = document.getElementById('q').value.toLowerCase();
+  const rows = document.querySelectorAll('#tbl tbody tr');
+  rows.forEach(r => {
+    const t = r.innerText.toLowerCase();
+    // hide zoom row if parent is hidden
+    if (t.includes(q)) {
+      r.style.display = '';
+      const next = r.nextElementSibling;
+      if (next && next.classList.contains('zoom-row')) next.style.display = '';
+    } else {
+      r.style.display = 'none';
+      const next = r.nextElementSibling;
+      if (next && next.classList.contains('zoom-row')) next.style.display = 'none';
+    }
+  });
+}
+
+// Toggle in-place zoom row
+function toggleZoom(btn, src) {
+  const tr = btn.closest('tr');
+  const next = tr.nextElementSibling;
+  if (next && next.classList.contains('zoom-row')) {
+    next.remove();
+    btn.textContent = 'Zoom';
+    return;
+  }
+  const zoomRow = document.createElement('tr');
+  zoomRow.className = 'zoom-row';
+  const td = document.createElement('td');
+  td.colSpan = 6;
+  td.innerHTML = `<div class="zoom-wrap"><img class="zoom-img" src="${src}" alt=""></div>`;
+  zoomRow.appendChild(td);
+  tr.parentNode.insertBefore(zoomRow, tr.nextSibling);
+  btn.textContent = 'Close';
+}
+</script>
+</body>
+</html>
