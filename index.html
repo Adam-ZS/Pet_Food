@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Pet Food Price Comparison</title>
+<style>
+  :root {
+    --bg: #0b1020;
+    --muted: #8aa0c5;
+    --text: #eaf0ff;
+    --accent: #5cc0ff;
+    --green: #27e59f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    background: radial-gradient(1200px 800px at 20% -10%, rgba(92,192,255,.07), transparent 40%),
+                radial-gradient(1000px 700px at 100% 0%, rgba(139,255,202,.06), transparent 40%),
+                var(--bg);
+    color: var(--text);
+  }
+  h1 { margin: 0 0 6px; font-size: 30px; letter-spacing: 0.2px; }
+  .sub { color: var(--muted); margin-bottom: 18px; }
+  .toolbar { display:flex; gap:12px; align-items:center; margin:10px 0 14px; flex-wrap:wrap; }
+  .search { flex:1 1 320px; }
+  .search input {
+    width:100%; padding:14px 16px; border-radius:14px; border:1px solid #2b355a; outline:none;
+    background:#0f1731; color:#fff; font-size:15px;
+  }
+  .btn { padding:10px 14px; border-radius:12px; border:1px solid #315a86; background:#123257; color:#d7e6ff; cursor:pointer; }
+  .btn.primary { border-color:#1a6a53; background:#0f3a2e; }
+  .btn.danger { border-color:#6a3131; background:#3a0f0f; }
+  .btn.small { padding:6px 10px; border-radius:10px; }
+  .table-wrap {
+    width:100%; overflow:auto; border:1px solid #28325a; border-radius:16px; background: #0f1731;
+    box-shadow: 0 22px 46px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.03);
+  }
+  table { width:100%; border-collapse:separate; border-spacing:0; min-width:1200px; }
+  thead th {
+    position: sticky; top:0; z-index:5; text-align:left; background:linear-gradient(180deg,#172046, #121933);
+    color:#b9c7e9; font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:.06em;
+    padding:14px; border-bottom:1px solid #28325a;
+  }
+  tbody td { padding:14px; border-bottom:1px dashed #263056; vertical-align:middle; }
+  tbody tr:hover { background:rgba(92,192,255,.06); }
+  .img-cell { width: 380px; }
+  .thumb {
+    width: 340px; height: auto; max-height: 340px; object-fit: cover;
+    border-radius: 16px; display:block; background:#101936; border:1px solid #28325a;
+    box-shadow: 0 10px 22px rgba(0,0,0,.28);
+  }
+  .img-actions { margin-top:8px; display:flex; gap:8px; }
+  .pill { display:inline-block; padding:6px 10px; border-radius:999px; background:rgba(92,192,255,.12); color:#cfe9ff; font-size:12px; }
+  .footer { margin-top:12px; color:#95a6cc; font-size:12px; }
+  .editable { white-space:nowrap; }
+  input.inline-input {
+    width: 260px; padding:6px 8px; border-radius:8px; border:1px solid #2b355a; background:#0e1732; color:#fff;
+  }
+  td.weight .inline-input { width: 150px; }
+  td.price .inline-input { width: 200px; }
+
+  /* Add form */
+  .add-wrap { display:none; gap:10px; flex-wrap:wrap; align-items:center; margin:10px 0 16px; }
+  .add-wrap input {
+    padding:10px 12px; border-radius:10px; border:1px solid #2b355a; background:#0e1732; color:#fff;
+  }
+  .add-wrap .wide { min-width:260px; }
+  .add-wrap .mid  { min-width:160px; }
+  .add-wrap .sm   { min-width:120px; }
+
+  /* In-place zoom row */
+  tr.zoom-row td {
+    background: #0d1430;
+    padding: 18px;
+    border-bottom: 1px dashed #263056;
+  }
+  .zoom-wrap {
+    width: 100%;
+    display: grid;
+    place-items: center;
+  }
+  .zoom-img {
+    max-width: 100%;
+    max-height: 78vh;
+    object-fit: contain; /* not cropped */
+    border-radius: 14px;
+    border: 1px solid #2b355a;
+    box-shadow: 0 16px 30px rgba(0,0,0,.35);
+  }
+</style>
+</head>
+<body>
+  <h1>Pet Food Price Comparison</h1>
+  <div class="sub">Put <strong>index.html</strong> inside <code>Pet_Food/</code> and images inside <code>Pet_Food/images/</code>. Edit Description (Product), Weight, and Price. Add new rows as needed. All changes are saved in your browser (localStorage).</div>
+
+  <div class="toolbar">
+    <div class="search"><input id="q" type="search" placeholder="Search by brand, product, type or price… (e.g., Whiskas, 1.5 kg, pouch, 9.50)"></div>
+    <button id="toggle-add" class="btn">+ Add New Item</button>
+    <span class="pill" id="count-pill"></span>
+  </div>
+
+  <div id="add-wrap" class="add-wrap">
+    <input id="new-img" class="wide" placeholder="Image filename (inside images/) e.g., myphoto.jpeg">
+    <input id="new-brand" class="mid" placeholder="Brand">
+    <input id="new-product" class="wide" placeholder="Description / Product">
+    <input id="new-type" class="mid" placeholder="Type (e.g., Dry Cat Food)">
+    <input id="new-weight" class="sm" placeholder="Weight (e.g., 1.5 kg)">
+    <input id="new-price" class="sm" placeholder="Price (e.g., 9.99)">
+    <button id="add-btn" class="btn primary">Add Row</button>
+    <button id="cancel-add" class="btn danger">Cancel</button>
+  </div>
+
+  <div class="table-wrap">
+    <table id="tbl">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Brand</th>
+          <th>Product</th>
+          <th>Type</th>
+          <th>Weight</th>
+          <th>Price (AED)</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="footer">Tip: Use “Zoom” to open the image below the row (full size within your screen). Use the Add form to append more products.</div>
+
+<script id="seed" type="application/json">[{"img": "images/whicska%20cat%20wet%20can.jpeg", "brand": "Whiskas", "product": "Tasty Mince Beef / Lamb & Turkey (Can)", "type": "Wet Cat Food", "weight": "400 g", "price": "9.50 – 9.75"}, {"img": "images/whiskas%20wet%20cat.jpeg", "brand": "Whiskas", "product": "Ocean Fish / Tuna / Salmon (Pouch)", "type": "Wet Cat Food", "weight": "85 g", "price": "3.50 – 5.00"}, {"img": "images/whiskas%20wet%20cat.jpeg", "brand": "Whiskas", "product": "Mix of Tuna Collection 12×70 g", "type": "Multipack Pouches", "weight": "840 g", "price": "35.98"}, {"img": "images/purina%20fncy%20tuna%20treat%20cat.jpeg", "brand": "Fancy Feast", "product": "Tuna / Grilled / Gravy Lovers (Can)", "type": "Wet Cat Food", "weight": "85 g", "price": "4.99 – 6.95"}, {"img": "images/purina%20felix.jpeg", "brand": "Purina Felix", "product": "As Good As It Looks (Jelly Range)", "type": "Wet Cat Pouch", "weight": "85 g", "price": "3.75 – 4.75"}, {"img": "images/purina%20felix.jpeg", "brand": "Purina ONE", "product": "Healthy Kitten & Adult (Pouch)", "type": "Wet Cat Pouch", "weight": "85 g", "price": "6.99"}, {"img": "images/purina%20adul%20dry.jpeg", "brand": "Purina Pro Plan", "product": "Adult Vital Functions (Salmon)", "type": "Dry Cat Food", "weight": "—", "price": "—"}, {"img": "images/purena%20wet.jpeg", "brand": "Purina Pro Plan Vet Diets", "product": "EN Gastrointestinal with Chicken", "type": "Wet Cat Food", "weight": "850 g", "price": "—"}, {"img": "images/reflex%20cat%20dry%20.jpeg", "brand": "Reflex", "product": "Kitten Chicken & Rice", "type": "Dry Cat Food", "weight": "2 kg", "price": "47.25"}, {"img": "images/cindee%20cat%20food.jpeg", "brand": "Cindee", "product": "Cat Food Mackerel", "type": "Dry Cat Food", "weight": "1.5 kg", "price": "24.00"}, {"img": "images/me-o%20cat%20adult.jpeg", "brand": "Me-O", "product": "Seafood Adult", "type": "Dry Cat Food", "weight": "1.2 kg", "price": "26.99"}, {"img": "images/cutie%20catz%20treats.jpeg", "brand": "Cuties Catz", "product": "Creamy Cat Treats (Tuna/Salmon)", "type": "Treat", "weight": "56 g", "price": "7.99"}, {"img": "images/cuties%20Catz%20dry.jpeg", "brand": "Cuties Catz", "product": "Seafood Flavor", "type": "Dry Cat Food", "weight": "1 kg", "price": "17.99"}, {"img": "images/petrina%20catfood%20can.jpeg", "brand": "Petrina", "product": "Cat Pâté w/ MSC White Fish", "type": "Wet Pâté", "weight": "100 g", "price": "2.49"}, {"img": "images/petrina%20cat%20wet%20food%20.jpeg", "brand": "Petrina", "product": "Beef Chunks in Gravy (Can)", "type": "Wet Cat Food", "weight": "410 g", "price": "3.50 (2 for 7 AED)"}, {"img": "images/petrina%20cat%20pillow%20traet.jpeg", "brand": "Petrina", "product": "Cat Pillow Chicken", "type": "Treat Bites", "weight": "60 g", "price": "3.99"}, {"img": "images/petrina%20treat%20premuim.jpeg", "brand": "Petrina", "product": "Cat Sticks (Beef & Poultry / Poultry & Lamb)", "type": "Treat Sticks", "weight": "50 g", "price": "6.99"}, {"img": "images/petrina%20tuna%20catwet.jpeg", "brand": "Petrina", "product": "Adult Cat Tuna / Kitten Tuna (Pouch)", "type": "Wet Cat Pouch", "weight": "75 g", "price": "1.49"}, {"img": "images/petrina%20wet.jpeg", "brand": "Petrina", "product": "Adult Cat Chicken & Tuna / Chicken & Salmon (Pouch)", "type": "Wet Cat Pouch", "weight": "75 g", "price": "1.49"}, {"img": "images/BADO%28cat%29.jpeg", "brand": "Bado", "product": "Adult Cat Food Salmon", "type": "Dry Cat Food", "weight": "1.5 kg", "price": "19.95"}, {"img": "images/pedigre%20dog%20adult%20mini%20dry.jpeg", "brand": "Pedigree", "product": "Adult Mini Toy & Small Breed", "type": "Dry Dog Food", "weight": "1.5 kg", "price": "27.99"}, {"img": "images/purina%20dog%20small%20bites%20premuim.jpeg", "brand": "Purina ONE", "product": "Small Bites Beef & Rice", "type": "Dry Dog Food", "weight": "1.8 kg", "price": "50.75"}, {"img": "images/royalkanin%20mini%20wet.jpeg", "brand": "Royal Canin", "product": "Mini Adult Gravy Salsa (12×85 g)", "type": "Wet Dog Food Pouch", "weight": "1.02 kg", "price": "—"}, {"img": "images/royalkanin%20puppy%20wet.jpeg", "brand": "Royal Canin", "product": "Mini Puppy 2–10 Months (12×85 g)", "type": "Wet Dog Food Pouch", "weight": "1.02 kg", "price": "—"}, {"img": "images/royalkanin%20puppy.jpeg", "brand": "Royal Canin", "product": "Mini Indoor Puppy 2–10 Months", "type": "Dry Dog Food", "weight": "—", "price": "—"}, {"img": "images/royalkanin%20mini%20dog.jpeg", "brand": "Royal Canin", "product": "Mini Adult Dry", "type": "Dry Dog Food", "weight": "—", "price": "—"}, {"img": "images/BADO%28turky%29dog.jpeg", "brand": "Bado", "product": "Adult Dog Food Lamb & Rice", "type": "Dry Dog Food", "weight": "2.5 kg", "price": "18.99"}, {"img": "images/CargeDOG.jpeg", "brand": "Carge", "product": "Adult Dog Food Beef", "type": "Dry Dog Food", "weight": "—", "price": "13.95"}]</script>
+<script>
+const SEED = JSON.parse(document.getElementById('seed').textContent);
+const tbody = document.getElementById('tbody');
+const countPill = document.getElementById('count-pill');
+const searchBox = document.getElementById('q');
+const addWrap = document.getElementById('add-wrap');
+
+// localStorage helpers
+function pkey(idx, field){ return 'p_' + field + '_' + idx; } // product edits for seed
+function wkey(idx, field){ return 'w_' + field + '_' + idx; } // weight edits for seed
+function rkey(idx, field){ return 'r_' + field + '_' + idx; } // price edits for seed
+
+const EXTRA_KEY = 'extra_items_v1'; // array of added rows
+
+function loadExtras(){
+  try {
+    const raw = localStorage.getItem(EXTRA_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(_) { return []; }
+}
+function saveExtras(arr){
+  localStorage.setItem(EXTRA_KEY, JSON.stringify(arr));
+}
+
+let EXTRAS = loadExtras();
+
+function getDisplayValues(idx, it, isExtra, xIndex){
+  if(isExtra){
+    return {
+      product: it.product,
+      weight: it.weight,
+      price: it.price
+    };
+  } else {
+    return {
+      product: localStorage.getItem(pkey(idx, 'product')) ?? it.product,
+      weight:  localStorage.getItem(wkey(idx, 'weight'))  ?? it.weight,
+      price:   localStorage.getItem(rkey(idx, 'price'))   ?? it.price,
+    };
+  }
+}
+
+function rowTemplate(idx, it, isExtra=false, xIndex=null){
+  const img = it.img;
+  const brand = it.brand;
+  const type = it.type;
+  const vals = getDisplayValues(idx, it, isExtra, xIndex);
+  const rid = isExtra ? 'x' + xIndex : idx; // row id for zoom pairing
+
+  return `
+  <tr data-idx="${idx}" data-extra="${isExtra ? '1' : '0'}" data-x="${isExtra ? xIndex : ''}">
+    <td class="img-cell">
+      <img src="${img}" alt="" class="thumb" onerror="this.classList.add('broken'); this.alt='(image not found)';">
+      <div class="img-actions">
+        <button class="btn small zoom-btn">Zoom</button>
+      </div>
+    </td>
+    <td>${brand}</td>
+    <td class="editable product"><span class="val">${vals.product}</span> <button class="btn small edit-btn" data-field="product">Edit</button></td>
+    <td>${type}</td>
+    <td class="editable weight"><span class="val">${vals.weight}</span> <button class="btn small edit-btn" data-field="weight">Edit</button></td>
+    <td class="editable price"><span class="val">${vals.price}</span> <button class="btn small edit-btn" data-field="price">Edit</button></td>
+  </tr>`;
+}
+
+function render(){
+  const seedRows = SEED.map((it, i)=>rowTemplate(i, it, false, null)).join('');
+  const extraRows = EXTRAS.map((it, xi)=>rowTemplate(SEED.length + xi, it, true, xi)).join('');
+  tbody.innerHTML = seedRows + extraRows;
+  countPill.textContent = 'Total items: ' + (SEED.length + EXTRAS.length);
+}
+render();
+
+// Event delegation for Zoom + Edit/Save/Cancel
+tbody.addEventListener('click', (e)=>{
+  const target = e.target;
+  const row = target.closest('tr');
+  if(!row) return;
+  const idx = parseInt(row.getAttribute('data-idx'), 10);
+  const isExtra = row.getAttribute('data-extra') === '1';
+  const xIndex = isExtra ? parseInt(row.getAttribute('data-x'),10) : null;
+
+  // Zoom
+  if(target.classList.contains('zoom-btn')){
+    const next = row.nextElementSibling;
+    if(next && next.classList.contains('zoom-row')){
+      next.remove();
+      target.textContent = 'Zoom';
+      return;
+    }
+    const zr = document.createElement('tr');
+    zr.className = 'zoom-row';
+    const td = document.createElement('td');
+    td.colSpan = 6;
+    const src = (isExtra ? EXTRAS[xIndex].img : SEED[idx].img);
+    td.innerHTML = '<div class="zoom-wrap"><img class="zoom-img" src="'+src+'" alt=""></div>';
+    zr.appendChild(td);
+    row.parentNode.insertBefore(zr, row.nextSibling);
+    target.textContent = 'Close';
+    return;
+  }
+
+  // Edit flow
+  if(target.classList.contains('edit-btn')){
+    const cell = target.closest('td');
+    const field = target.getAttribute('data-field'); // product|weight|price
+    const valEl = cell.querySelector('.val');
+    const cur = valEl.textContent.trim();
+    cell.innerHTML = '<input class="inline-input" value="'+cur.replaceAll('"','&quot;')+'"> '
+      + '<button class="btn small save-btn" data-field="'+field+'">Save</button> '
+      + '<button class="btn small cancel-btn" data-field="'+field+'" data-orig="'+cur.replaceAll('"','&quot;')+'">Cancel</button>';
+    cell.querySelector('input').focus();
+    return;
+  }
+  if(target.classList.contains('save-btn')){
+    const cell = target.closest('td');
+    const field = target.getAttribute('data-field');
+    const inp = cell.querySelector('input');
+    const val = inp.value.trim();
+    if(isExtra){
+      EXTRAS[xIndex][field] = val;
+      saveExtras(EXTRAS);
+    }else{
+      // persist individually
+      const k = (field === 'product') ? pkey(idx, 'product') :
+                (field === 'weight')  ? wkey(idx, 'weight')  :
+                                        rkey(idx, 'price');
+      localStorage.setItem(k, val);
+    }
+    cell.innerHTML = '<span class="val">'+val+'</span> <button class="btn small edit-btn" data-field="'+field+'">Edit</button>';
+    return;
+  }
+  if(target.classList.contains('cancel-btn')){
+    const cell = target.closest('td');
+    const field = target.getAttribute('data-field');
+    const orig = target.getAttribute('data-orig');
+    let val = orig;
+    if(isExtra){
+      val = EXTRAS[xIndex][field];
+    }else{
+      const saved = (field === 'product') ? localStorage.getItem(pkey(idx,'product')) :
+                    (field === 'weight')  ? localStorage.getItem(wkey(idx,'weight'))  :
+                                            localStorage.getItem(rkey(idx,'price'));
+      val = saved ?? orig;
+    }
+    cell.innerHTML = '<span class="val">'+val+'</span> <button class="btn small edit-btn" data-field="'+field+'">Edit</button>';
+    return;
+  }
+});
+
+// Live search
+searchBox.addEventListener('input', ()=>{
+  const q = searchBox.value.toLowerCase();
+  [...tbody.querySelectorAll('tr')].forEach(tr=>{
+    if(tr.classList.contains('zoom-row')) return;
+    const txt = tr.innerText.toLowerCase();
+    const show = txt.includes(q);
+    tr.style.display = show ? '' : 'none';
+    const nx = tr.nextElementSibling;
+    if(nx && nx.classList.contains('zoom-row')) nx.style.display = show ? '' : 'none';
+  });
+});
+
+// Add New Item controls
+document.getElementById('toggle-add').addEventListener('click', ()=>{
+  addWrap.style.display = addWrap.style.display === 'flex' ? 'none' : 'flex';
+});
+
+document.getElementById('cancel-add').addEventListener('click', ()=>{
+  addWrap.style.display = 'none';
+});
+
+document.getElementById('add-btn').addEventListener('click', ()=>{
+  const img = document.getElementById('new-img').value.trim();
+  const brand = document.getElementById('new-brand').value.trim();
+  const product = document.getElementById('new-product').value.trim();
+  const type = document.getElementById('new-type').value.trim();
+  const weight = document.getElementById('new-weight').value.trim();
+  const price = document.getElementById('new-price').value.trim();
+  if(!img || !brand || !product){
+    alert('Please fill at least Image filename, Brand and Product.');
+    return;
+  }
+  const encoded = 'images/' + encodeURIComponent(img);
+  EXTRAS.push({img: encoded, brand, product, type, weight, price});
+  saveExtras(EXTRAS);
+  render();
+  // clear inputs
+  ['new-img','new-brand','new-product','new-type','new-weight','new-price'].forEach(id=>document.getElementById(id).value='');
+  addWrap.style.display = 'none';
+});
+</script>
+</body>
+</html>
